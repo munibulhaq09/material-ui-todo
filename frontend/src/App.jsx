@@ -18,6 +18,9 @@ import {
 import Signup from "./pages/Signup";
 import Login from "./pages/Login";
 import Todo from "./pages/Todo";
+import VerifyEmail from "./pages/VerifyEmail";
+
+
 
 // Landing Page
 function Home() {
@@ -136,6 +139,11 @@ function AppRoutes() {
             <Route
                 path="/signup"
                 element={<Signup />}
+            />
+
+            <Route
+            path="/verify-email"
+            element={<VerifyEmail />}
             />
 
             <Route

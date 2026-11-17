@@ -1,5 +1,5 @@
 import { useState } from "react";
-
+import { useNavigate } from "react-router-dom";
 import {
     Container,
     Box,
@@ -21,6 +21,8 @@ function Signup() {
     const [message, setMessage] = useState("");
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
+
+    const navigate = useNavigate();
 
     const handleSignup = async (e) => {
         e.preventDefault();
@@ -160,6 +162,20 @@ function Signup() {
                         {loading ? "Creating Account..." : "Sign Up"}
                     </Button>
 
+                </Box>
+                <Box
+                display="flex"
+                justifyContent="center"
+                alignItems="center"
+                mt={2}
+                >
+                    <Typography variant="body2">
+                        Already have an account?
+                    </Typography>
+                    <Button variant="text"
+                    onClick={()=>navigate("/login")}>
+                        Sign In
+                    </Button>
                 </Box>
 
             </Paper>

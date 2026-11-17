@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 import {
     Container,
@@ -19,6 +20,8 @@ function Login({ onLogin }) {
 
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
+
+    const navigate = useNavigate();
 
     const handleLogin = async (e) => {
         e.preventDefault();
@@ -130,6 +133,20 @@ function Login({ onLogin }) {
                         {loading ? "Signing In..." : "Sign In"}
                     </Button>
 
+                </Box>
+                <Box
+                display="flex"
+                justifyContent="center"
+                alignItems="center"
+                mt={2}
+                >
+                    <Typography variant="body2">
+                        Don't have an account?
+                    </Typography>
+                    <Button variant="text"
+                    onClick={()=>navigate("/signup")}>
+                        Sign Up
+                    </Button>
                 </Box>
 
             </Paper>

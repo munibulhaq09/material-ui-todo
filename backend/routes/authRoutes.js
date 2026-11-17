@@ -72,7 +72,7 @@ console.log("Registration email:", req.body.email);
 
         //verification link
         const verificationLink =
-            `${process.env.API_URL}/api/auth/verify-email?token=${verificationToken}`;
+            `${process.env.CLIENT_URL}/verify-email?token=${verificationToken}`;
         // Create transporter
         const transporter = nodemailer.createTransport({
             host: "smtp.gmail.com",
@@ -156,6 +156,95 @@ router.get("/verify-email", async (req, res) => {
         res.status(500).send("Email verification failed.");
     }
 });
+
+//resend link
+router.post("/resend-verification", async (req, res) => {
+    try {
+        const { email } = req.body;
+
+        // Check email
+        if (!email?.trim()) {
+            return res.status(400).json({
+                message: "Email is required"
+            });
+        }
+
+        // Find user
+        const user = await User.findOne({
+            email: email.trim().toLowerCase()
+        });
+
+        if (!user) {
+            return res.status(404).json({
+                message: "User not found"
+            });
+        }
+
+        // Check if already verified
+        if (user.isVerified) {
+            return res.status(400).json({
+                message: "Email is already verified. Please sign in."
+            });
+        }
+
+        // Generate new verification token
+        const verificationToken = crypto
+            .randomBytes(32)
+            .toString("hex");
+
+        // Hash token
+        const hashedToken = crypto
+            .createHash("sha256")
+            .update(verificationToken)
+            .digest("hex");
+
+        // Update token and expiry
+        user.verificationToken = hashedToken;
+        user.verificationTokenExpires = Date.now() + 15 * 60 * 1000;
+
+        await user.save();
+
+        // Create new verification link
+        const verificationLink =
+            `${process.env.CLIENT_URL}/verify-email?token=${verificationToken}`;
+
+        // Create transporter
+        const transporter = nodemailer.createTransport({
+            host: "smtp.gmail.com",
+            port: 465,
+            secure: true,
+            auth: {
+                user: process.env.EMAIL_USER,
+                pass: process.env.EMAIL_PASS
+            }
+        });
+
+        // Send new verification email
+        await transporter.sendMail({
+            from: `"TodoApp" <${process.env.EMAIL_USER}>`,
+            to: user.email,
+            subject: "New TodoApp Verification Link",
+            html: `
+                <h2>TodoApp Email Verification</h2>
+                <p>Your new verification link is ready.</p>
+                <a href="${verificationLink}">Verify Email</a>
+                <p>This link expires in 15 minutes.</p>
+            `
+        });
+
+        res.status(200).json({
+            message: "A new verification email has been sent."
+        });
+
+    } catch (error) {
+        console.error("Resend verification error:", error);
+
+        res.status(500).json({
+            message: "Could not send verification email."
+        });
+    }
+});
+
 
 //login
 router.post("/login", async (req, resp)=>{
